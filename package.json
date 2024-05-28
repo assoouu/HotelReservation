@@ -12,7 +12,6 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.23.1",
-    "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4",
     "web3": "^4.9.0"
   },
@@ -41,6 +40,19 @@
     ]
   },
   "devDependencies": {
-    "react-app-rewired": "^2.2.1"
-  }
+    "@eslint/compat": "^1.0.1",
+    "@eslint/js": "^9.3.0",
+    "@openzeppelin/contracts": "^5.0.2",
+    "eslint": "^9.3.0",
+    "eslint-plugin-react": "^7.34.2",
+    "globals": "^15.3.0",
+    "react-app-rewired": "^2.2.1",
+    "react-scripts": "^5.0.1",
+    "truffle": "^5.4.29"
+  },
+  "description": "<<<<<<< HEAD # HotelReservation ======= # Getting Started with Create React App",
+  "main": "config-overrides.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

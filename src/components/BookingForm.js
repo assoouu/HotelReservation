@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { web3, setupContract, hotelBooking } from '../utils/web3';
 import ipfs from '../utils/ipfs';
 
 const BookingForm = () => {
     const { roomId } = useParams(); // URL 파라미터에서 roomId를 가져옴
+    const navigate = useNavigate(); // useNavigate 훅 사용
     const [checkInDate, setCheckInDate] = useState(''); // 체크인 날짜 상태
     const [checkOutDate, setCheckOutDate] = useState(''); // 체크아웃 날짜 상태
     const [userName, setUserName] = useState(''); // 사용자 이름 상태
@@ -39,8 +40,8 @@ const BookingForm = () => {
 
             // 사용자 정보를 IPFS에 저장 (임의로 지정한 값 사용)
             const userInfo = {
-                name: "John Doe",
-                email: "john.doe@example.com",
+                name: userName,
+                email: userEmail,
             };
             console.log("User Info: ", userInfo);
             const added = await ipfs.add(JSON.stringify(userInfo)); // IPFS에 사용자 정보 추가
@@ -65,6 +66,7 @@ const BookingForm = () => {
                 .send({ from: account, value: price, gasPrice });
 
             alert('Room booked successfully! Your information hash is: ' + ipfsHash); // 예약 성공 메시지 표시
+            navigate('/'); // 예약 후 메인 페이지로 리디렉션
         } catch (error) {
             console.error("Error during booking:", error);
             alert("Error during booking. See console for details."); // 예약 중 오류 발생 시 메시지 표시
@@ -99,7 +101,7 @@ const BookingForm = () => {
                 value={checkOutDate}
                 onChange={e => setCheckOutDate(e.target.value)} // 체크아웃 날짜 입력 처리
             />
-            <button onClick={handleBooking}>Book</button> // 예약 버튼 클릭 시 handleBooking 함수 호출
+            <button onClick={handleBooking}>Book</button> {/* 예약 버튼 클릭 시 handleBooking 함수 호출 */}
         </div>
     );
 };
