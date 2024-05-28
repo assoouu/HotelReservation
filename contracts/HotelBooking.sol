@@ -18,6 +18,7 @@ contract HotelBooking {
         uint checkOutDate;    // 체크아웃 날짜 (타임스탬프)
         uint bookingTime;     // 예약한 시간 (타임스탬프)
         bool isCancelled;     // 예약 취소 여부
+        string ipfsHash;      // 사용자 정보의 IPFS 해시
     }
 
     address public owner;           // 계약 소유자
@@ -51,14 +52,14 @@ contract HotelBooking {
     }
 
     // 방을 예약하는 함수
-    function bookRoom(uint _roomId, uint _checkInDate, uint _checkOutDate) public payable {
+    function bookRoom(uint _roomId, uint _checkInDate, uint _checkOutDate, string memory _ipfsHash) public payable {
         require(_roomId < rooms.length, "Invalid room id"); // 방 ID가 유효한지 확인
         require(!rooms[_roomId].isBooked, "Room is already booked"); // 방이 이미 예약되어 있지 않은지 확인
         require(msg.value == rooms[_roomId].price, "Incorrect Ether sent"); // 정확한 이더를 전송했는지 확인
 
         rooms[_roomId].isBooked = true; // 방을 예약된 상태로 표시
         uint bookingId = bookings.length; // 새로운 예약 ID는 현재 예약 배열의 길이
-        bookings.push(Booking(msg.sender, _roomId, _checkInDate, _checkOutDate, block.timestamp, false)); // 새로운 예약을 배열에 추가
+        bookings.push(Booking(msg.sender, _roomId, _checkInDate, _checkOutDate, block.timestamp, false, _ipfsHash)); // 새로운 예약을 배열에 추가
         roomBookings[_roomId] = bookings[bookingId]; // 방 ID를 예약 정보와 매핑
 
         emit RoomBooked(_roomId, msg.sender, _checkInDate, _checkOutDate); // RoomBooked 이벤트 발생
