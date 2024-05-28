@@ -30,6 +30,12 @@ const BookingForm = () => {
             return;
         }
 
+        // 입력 필드가 비어 있는지 확인
+        if (!userName || !userEmail || !password || !checkInDate || !checkOutDate) {
+            alert("All fields must be filled out to book a room.");
+            return;
+        }
+
         try {
             const accounts = await web3.eth.getAccounts(); // 사용자의 계정 가져오기
             const account = accounts[0]; // 첫 번째 계정 사용
@@ -100,6 +106,9 @@ const BookingForm = () => {
                 onChange={e => setCheckOutDate(e.target.value)} // 체크아웃 날짜 입력 처리
             />
             <button onClick={handleBooking}>Book</button> {/* 예약 버튼 클릭 시 handleBooking 함수 호출 */}
+            <div style={{ marginTop: '20px' }}> {/* 여백을 추가하여 버튼을 아래에 배치 */}
+                <button onClick={() => navigate('/')}>Home</button> {/* 홈 버튼 */}
+            </div>
         </div>
     );
 };

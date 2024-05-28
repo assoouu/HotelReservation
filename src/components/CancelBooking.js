@@ -21,6 +21,12 @@ const CancelBooking = () => {
     }, []);
 
     const handleCancel = async () => {
+        // 입력 필드가 비어 있는지 확인
+        if (!roomId || !password) {
+            alert("Room ID and Password must be filled out to cancel a booking.");
+            return;
+        }
+
         try {
             // Ensure web3 and hotelBooking are initialized
             if (!web3 || !hotelBooking) {
@@ -109,6 +115,9 @@ const CancelBooking = () => {
                 onChange={e => setPassword(e.target.value)} // 패스워드 입력 처리
             />
             <button onClick={handleCancel}>Cancel</button>
+            <div style={{ marginTop: '20px' }}> {/* 여백을 추가하여 버튼을 아래에 배치 */}
+                <button onClick={() => navigate('/')}>Home</button> {/* 홈 버튼 */}
+            </div>
             {refundAmount > BigInt(0) && ( // Check for BigInt zero
                 <p>Refund Amount: {web3.utils.fromWei(refundAmount.toString(), 'ether')} ETH</p>
             )}
