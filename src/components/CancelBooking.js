@@ -4,37 +4,33 @@ import { web3, hotelBooking, setupContract } from '../utils/web3';
 import ipfs from '../utils/ipfs';
 
 const CancelBooking = () => {
-    const [roomId, setRoomId] = useState(''); // 방 ID 상태
-    const [account, setAccount] = useState(''); // 계정 상태
-    const [password, setPassword] = useState(''); // 패스워드 상태
-    const [refundAmount, setRefundAmount] = useState(BigInt(0)); // 환불 금액 상태
-    const navigate = useNavigate(); // useNavigate 훅 사용
+    const [roomId, setRoomId] = useState('');
+    const [account, setAccount] = useState('');
+    const [password, setPassword] = useState('');
+    const [refundAmount, setRefundAmount] = useState(BigInt(0));
+    const navigate = useNavigate();
 
     useEffect(() => {
-        // Fetch account and setup contract when component mounts
         const init = async () => {
-            await setupContract(); // 스마트 계약 초기화
-            const accounts = await web3.eth.getAccounts(); // 사용자의 계정 가져오기
-            setAccount(accounts[0]); // 첫 번째 계정 설정
+            await setupContract();
+            const accounts = await web3.eth.getAccounts();
+            setAccount(accounts[0]);
         };
         init();
     }, []);
 
     const handleCancel = async () => {
-        // 입력 필드가 비어 있는지 확인
         if (!roomId || !password) {
             alert("Room ID and Password must be filled out to cancel a booking.");
             return;
         }
 
         try {
-            // Ensure web3 and hotelBooking are initialized
             if (!web3 || !hotelBooking) {
                 alert('Web3 or contract not initialized properly. Please check your setup.');
                 return;
             }
 
-            // Ensure account is set before proceeding
             if (!account) {
                 alert('Account not loaded yet. Please try again.');
                 return;
@@ -43,19 +39,16 @@ const CancelBooking = () => {
             const roomBooking = await hotelBooking.methods.roomBookings(roomId).call();
             console.log("Room Booking:", roomBooking);
 
-            // IPFS에서 사용자 정보 가져오기
             const ipfsHash = roomBooking.ipfsHash;
             let fileContent = '';
             for await (const chunk of ipfs.cat(ipfsHash)) {
                 fileContent += new TextDecoder("utf-8").decode(chunk);
             }
 
-            // JSON 형식인지 확인
             try {
                 const userInfo = JSON.parse(fileContent);
                 console.log("User Info: ", userInfo);
 
-                // 패스워드 검증
                 if (userInfo.password !== password) {
                     alert('Incorrect password. Cancellation not allowed.');
                     return;
@@ -68,7 +61,6 @@ const CancelBooking = () => {
                 const elapsed = BigInt(Math.floor(Date.now() / 1000)) - bookingTime;
                 let refundPercentage = BigInt(0);
 
-                // 경과 시간에 따른 환불 비율 설정
                 if (elapsed < BigInt(60)) {
                     refundPercentage = BigInt(100);
                 } else if (elapsed < BigInt(120)) {
@@ -85,14 +77,13 @@ const CancelBooking = () => {
                 setRefundAmount(refund);
                 console.log("Refund Amount:", refund);
 
-                const gasPrice = await web3.eth.getGasPrice(); // Get current gas price
+                const gasPrice = await web3.eth.getGasPrice();
 
                 await hotelBooking.methods.cancelBooking(roomId)
-                    .send({ from: account, gasPrice: gasPrice }); // Specify the from address and gas price
+                    .send({ from: account, gasPrice: gasPrice });
 
                 alert(`Booking cancelled successfully! Refund amount: ${web3.utils.fromWei(refund.toString(), 'ether')} ETH`);
-                navigate('/'); // 예약 취소 후 메인 페이지로 리디렉션
-
+                navigate('/');
             } catch (jsonError) {
                 console.error('Invalid JSON format:', fileContent);
                 alert('Error during cancellation. Invalid user information format.');
@@ -105,22 +96,24 @@ const CancelBooking = () => {
     };
 
     return (
-        <div>
-            <h2>Cancel Booking</h2>
-            <input type="number" placeholder="Room ID" value={roomId} onChange={e => setRoomId(e.target.value)} />
-            <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={e => setPassword(e.target.value)} // 패스워드 입력 처리
-            />
-            <button onClick={handleCancel}>Cancel</button>
-            <div style={{ marginTop: '20px' }}> {/* 여백을 추가하여 버튼을 아래에 배치 */}
-                <button onClick={() => navigate('/')}>Home</button> {/* 홈 버튼 */}
+        <div className="container">
+            <div className="form-container">
+                <h2>Cancel Booking</h2>
+                <input type="number" placeholder="Room ID" value={roomId} onChange={e => setRoomId(e.target.value)} />
+                <input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                />
+                <button onClick={handleCancel}>Cancel</button>
+                <div style={{ marginTop: '20px' }}>
+                    <button onClick={() => navigate('/')}>Home</button>
+                </div>
+                {refundAmount > BigInt(0) && (
+                    <p>Refund Amount: {web3.utils.fromWei(refundAmount.toString(), 'ether')} ETH</p>
+                )}
             </div>
-            {refundAmount > BigInt(0) && ( // Check for BigInt zero
-                <p>Refund Amount: {web3.utils.fromWei(refundAmount.toString(), 'ether')} ETH</p>
-            )}
         </div>
     );
 };
